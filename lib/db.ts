@@ -1,8 +1,46 @@
-import mongoose from "mongoose";
+import mongoose, { Connection } from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI!;
 
-if (!MONGODB_URI) {throw new Error("Please define MongoDb URI")
+if (!MONGODB_URI) {
+    throw new Error("Please define MongoDb URI");
 }
 
-let cached = global.mongoose;
+// Create a type for our cache
+type MongooseCache = {
+    conn: Connection | null;
+    promise: Promise<Connection> | null;
+};
+
+// Initialize with proper typing
+const globalWithMongoose = global as typeof globalThis & {
+    mongoose: MongooseCache;
+};
+
+let cached = globalWithMongoose.mongoose;
+
+if (!cached) {
+    cached = globalWithMongoose.mongoose = { conn: null, promise: null };
+}
+
+export async function connectToDatabase() {
+    if (cached.conn) {
+        return cached.conn;
+    }
+    if (!cached.promise) {
+        const opts = {
+            bufferCommands: true,
+            maxPoolSize: 10,
+        };
+        cached.promise = mongoose
+            .connect(MONGODB_URI, opts)
+            .then(() => mongoose.connection);
+    }
+    try {
+        cached.conn = await cached.promise
+    } catch (error) {
+        cached.promise = null
+        throw error
+    }
+    return cached.conn
+}
