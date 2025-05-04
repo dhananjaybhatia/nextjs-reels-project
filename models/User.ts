@@ -34,7 +34,12 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
+// Add the static method
+userSchema.statics.findByEmailWithPassword = function (email: string) {
+    return this.findOne({ email }).select('+password').exec();
+};
+
 // ✅ Reuse existing model if already defined (helps avoid OverwriteModelError during hot-reloading in Next.js)
 
-const User = mongoose.models?.User || mongoose.model<IUser>("User", userSchema)
-export default User
+const UserModel = mongoose.models?.UserModel || mongoose.model<IUser>("UserModel", userSchema)
+export default UserModel
