@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, model, models } from "mongoose";
 import bcrypt from "bcryptjs";
 
 export interface IUser {
@@ -9,37 +9,24 @@ export interface IUser {
     updatedAt?: Date;
 }
 
-const userSchema = new mongoose.Schema<IUser>(
+const userSchema = new Schema<IUser>(
     {
-        email: {
-            type: String,
-            required: [true, "Email is required"],
-            unique: [true, "Email already exist"],
-            trim: true,
-            lowercase: true,
-        },
-        password: {
-            type: String,
-            required: [true, "Password is required"],
-            minlength: [5, "Password must be at least 5 characters"],
-        },
+        email: { type: String, required: true, unique: true },
+        password: { type: String, required: true },
     },
-    { timestamps: true }
+    {
+        timestamps: true,
+        collection: "usermodels" // ◀◀◀ THIS FORCES THE COLLECTION NAME
+    }
 );
 
 userSchema.pre("save", async function (next) {
     if (this.isModified("password")) {
-        this.password = await bcrypt.hash("this.password", 10);
+        this.password = await bcrypt.hash(this.password, 10);
     }
     next();
 });
 
-// Add the static method
-userSchema.statics.findByEmailWithPassword = function (email: string) {
-    return this.findOne({ email }).select('+password').exec();
-};
+const UserModel = models?.UserModel || model<IUser>("UserModel", userSchema);
 
-// ✅ Reuse existing model if already defined (helps avoid OverwriteModelError during hot-reloading in Next.js)
-
-const UserModel = mongoose.models?.UserModel || mongoose.model<IUser>("UserModel", userSchema)
-export default UserModel
+export default UserModel;

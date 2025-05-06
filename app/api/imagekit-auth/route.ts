@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 import ImageKit from "imagekit";
 
 const imagekit = new ImageKit({
-    publicKey: process.env.NEXT_IMAGEKIT_PUBLIC_KEY!, // Only used on client
-    privateKey: process.env.NEXT_IMAGEKIT_PRIVATE_KEY!, // Required only on server
-    urlEndpoint: process.env.NEXT_IMAGEKIT_URL_ENDPOINT!,
+    publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!, // Only used on client
+    privateKey: process.env.NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY!, // Required only on server
+    urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
 });
 
 export async function GET() {

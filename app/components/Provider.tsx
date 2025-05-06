@@ -2,9 +2,10 @@
 
 import { IKContext } from "imagekitio-react";
 import { SessionProvider } from "next-auth/react";
+import { NotificationProvider } from "@/app/components/Notification"; // Adjust the path if needed
 
-const publicKey = process.env.NEXT_IMAGEKIT_PUBLIC_KEY;
-const urlEndpoint = process.env.NEXT_IMAGEKIT_URL_ENDPOINT;
+const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!;
+const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!;
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const authenticator = async () => {
@@ -26,15 +27,18 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       throw new Error("Image Authentication request failed.");
     }
   };
+
   return (
     <SessionProvider>
-      <IKContext
-        publicKey={publicKey}
-        urlEndpoint={urlEndpoint}
-        authenticator={authenticator}
-      >
-        {children}
-      </IKContext>
+      <NotificationProvider>
+        <IKContext
+          publicKey={publicKey}
+          urlEndpoint={urlEndpoint}
+          authenticator={authenticator}
+        >
+          {children}
+        </IKContext>
+      </NotificationProvider>
     </SessionProvider>
   );
 }
